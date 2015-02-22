@@ -17,7 +17,7 @@ When the base image is getting stale, simply re-run the tool to regenerate the b
   ```
   ./bin/base_docker_image '' '' ~/my-cool-ruby-project/ my-cool-ruby-project base
   ```
-  * Template file is defaulted to [templates/dockerfile_base](templates/dockerfile_base)
+  * Template file is defaulted to [templates/base_dockerfile](templates/base_dockerfile)
   * Base image is defaulted to 'ruby:latest', put any ruby docker image you may wish here (bundler is assumed to be available)
   * Your Gemfile and Gemfile.lock should be located as specified by the 3rd param 
   * Note the default template runs in production mode
