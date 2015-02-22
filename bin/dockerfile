@@ -1,0 +1,64 @@
+#!/bin/bash -ex
+
+function current_dir() {
+  echo $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+}
+
+function base_dir() {
+  echo $(cd "$(current_dir)/.." && pwd)
+}
+
+function template_dir() {
+  echo $(cd "$(base_dir)/templates" && pwd)
+}
+
+function copy_resources() {
+  local from_path=${1:-$(base_dir)}
+  local target_path="$2"
+
+  cp "$(base_dir)/.gemrc" $target_path
+  cp $from_path/Gemfile $target_path
+  cp $from_path/Gemfile.lock $target_path
+}
+
+function generate() {
+  local template_file=${1:-"$(template_dir)/base_dockerfile"}
+  local from=${2:-'ruby'}
+  local target_path=$(mktemp -dt)
+  local target_file="$target_path/Dockerfile"
+
+  sed -e "s;\$from;$from;g" $template_file > $target_file
+  echo $target_path
+}
+
+function build_image() {
+  local path="$1"
+  local full_tag="$2"
+
+  docker build --rm -t $full_tag $path
+}
+
+function push_image() {
+  local full_tag="$1"
+
+  docker push $full_tag
+}
+
+function clean_up() {
+  local target_path=$1
+
+  rm -rf $target_path
+}
+
+template_file=$1
+from_image=$2
+from_path=$3
+image_name=$4
+image_tag=$5
+
+target_path=$(generate "$template_file" "$from_image")
+copy_resources "$from_path" "$target_path"
+build_image "$target_path" "$image_name:$image_tag"
+#push_image $image_name:$image_tag
+
+trap "clean_up \"$target_path\"" EXIT

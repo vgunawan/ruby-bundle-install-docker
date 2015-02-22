@@ -1,0 +1,16 @@
+FROM $from
+MAINTAINER Valen Gunawan <vgunawan@dius.com.au>
+
+ENV RAILS_ENV=production
+ENV RACK_ENV=production
+
+ADD .gemrc .
+ADD Gemfile /tmp/bi/Gemfile
+ADD Gemfile.lock /tmp/bi/Gemfile.lock
+
+WORKDIR /tmp
+
+RUN cd bi && bundle install --jobs 8 --retry 3 --clean
+RUN rm -rf bi && rm -rf ~/.gemrc
+
+WORKDIR ~
