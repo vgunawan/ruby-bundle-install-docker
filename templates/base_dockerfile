@@ -4,6 +4,8 @@ MAINTAINER Valen Gunawan <vgunawan@dius.com.au>
 ENV RAILS_ENV=production
 ENV RACK_ENV=production
 
+RUN apt-get update && $install_libs
+
 ADD .gemrc .
 ADD Gemfile /tmp/bi/Gemfile
 ADD Gemfile.lock /tmp/bi/Gemfile.lock

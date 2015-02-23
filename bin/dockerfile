@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 function current_dir() {
   echo $(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -24,10 +24,11 @@ function copy_resources() {
 function generate() {
   local template_file=${1:-"$(template_dir)/base_dockerfile"}
   local from=${2:-'ruby'}
+  local libs_to_install="apt-get install -y $3"
   local target_path=$(mktemp -dt)
   local target_file="$target_path/Dockerfile"
 
-  sed -e "s;\$from;$from;g" $template_file > $target_file
+  sed -e "s;\$from;$from;g" -e "s;\$install_libs;$libs_to_install;g" $template_file > $target_file
   echo $target_path
 }
 
@@ -52,11 +53,13 @@ function clean_up() {
 
 template_file=$1
 from_image=$2
-from_path=$3
-image_name=$4
-image_tag=$5
+libs_to_install=$3
+from_path=$4
+image_name=$5
+image_tag=$6
 
-target_path=$(generate "$template_file" "$from_image")
+target_path=$(generate "$template_file" "$from_image" "$libs_to_install")
+cat $target_path/Dockerfile
 copy_resources "$from_path" "$target_path"
 build_image "$target_path" "$image_name:$image_tag"
 #push_image $image_name:$image_tag
